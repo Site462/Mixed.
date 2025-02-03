@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue de Maisons</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 16px;
+            padding-bottom: 80px;
+            background-color: #f8f9fa;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            margin-bottom: 80px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+            border: 1px solid #eee;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #f0f0f0;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 12px 0;
+            color: #333;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+        }
+
+        .footer {
+            padding: 12px 16px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            background: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2563eb;
+            background: #f0f7ff;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .duration {
+            margin: 12px 0;
+            font-size: 14px;
+            color: #666;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .buy-button {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .buy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .buy-button:active {
+            transform: scale(0.98);
+        }
+
+        .total-revenue {
+            color: #059669;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0fdf4;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .nav-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding: 12px;
+            z-index: 1000;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-button:hover {
+            color: #2563eb;
+            background-color: #f0f7ff;
+        }
+
+        .nav-button.active {
+            color: #2563eb;
+            background-color: #f0f7ff;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            z-index: 1100;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #f0f7ff;
+            color: #2563eb;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="notification"></div>
+    <div class="grid">
+        <div class="card" data-house-id="1">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 1">
+            <div class="card-content">
+                <h2 class="title">Premier maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 2 200 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   300  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 17 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 5 100 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(1, 2200)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 1 par personne</span>
+                <span id="purchaseLimit1"></span>
+            </div>
+        </div>
+        
+
+      <div class="card" data-house-id="2">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Deuxième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 5 100 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   600  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 20 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 12 000 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(2, 5100)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 2 par personne</span>
+                <span id="purchaseLimit2"></span>
+            </div>
+    </div>
+   
+   <div class="card" data-house-id="3">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Troisième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 12 500 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   1 200  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 21 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 25 200 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(3, 12500)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 2 par personne</span>
+                <span id="purchaseLimit2"></span>
+            </div>
+    </div>
+   
+   
+   <div class="card" data-house-id="4">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Quatrième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 25 500 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   2 500  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 21 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 52 500 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(4, 25500)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 2 par personne</span>
+                <span id="purchaseLimit2"></span>
+            </div>
+    </div>
+
+
+   <div class="card" data-house-id="5">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Cinquième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 52 500 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   5 200  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 21 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 109 200 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(5, 52500)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 2 par personne</span>
+                <span id="purchaseLimit2"></span>
+            </div>
+    </div>
+
+
+<div class="card" data-house-id="6">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Sixième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 109 200 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   10 200  XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 21 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 214 200 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(6, 109200)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 4 par personne</span>
+                <span id="purchaseLimit4"></span>
+            </div>
+    </div>
+
+<div class="card" data-house-id="7">
+            <div class="status-badge">Disponible</div>
+            <img src="https://image.noelshack.com/fichiers/2025/06/1/1738566118-palm-2-9-beachfront-hauteretreats-personnalis.jpg" alt="Maison 2">
+            <div class="card-content">
+                <h2 class="title">Septième maison</h2>
+                <div class="price-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    <span>Prix: 214 200 XOF</span>
+                </div>
+                <div class="info-item">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span>Revenus quotidien:   20 450 XOF</span>
+                </div>
+                <div class="duration">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Durée de contrat: 21 jours
+                </div>
+                <div class="total-revenue">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M2 12h20"/>
+                    </svg>
+                    Revenus total: 429 450 XOF
+                </div>
+                <button class="buy-button" onclick="investProduct(7, 214200)">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Investir maintenant
+                </button>
+            </div>
+            <div class="footer">
+                <span>Limite d'achat: 4 par personne</span>
+                <span id="purchaseLimit4"></span>
+            </div>
+    </div>
+
+   
+
+    <div class="nav-container">
+        <div class="nav-buttons">
+            <a href="investir.html" class="nav-button active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span class="nav-text">Immobilier</span>
+            </a>
+            
+            
+    <div class="nav-container">
+        <div class="nav-buttons">
+            <a href="#" class="nav-button active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span class="nav-text">Immobilier</span>
+            </a>
+
+            <a href="historique retrait.html" class="nav-button">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="nav-text">Historique</span>
+            </a>
+
+            <a href="equipe.html" class="nav-button">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="nav-text">Team</span>
+            </a>
+
+            <a href="solde.html" class="nav-button">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="nav-text">Compte</span>
+            </a>
+        </div>
+    </div>
+
+ <script type="module">
+// Import des modules Firebase nécessaires
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { 
+    getDatabase, 
+    ref, 
+    get, 
+    set, 
+    onValue, 
+    update, 
+    push, 
+    serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
+    authDomain: "maison-c53c7.firebaseapp.com",
+    databaseURL: "https://maison-c53c7-default-rtdb.firebaseio.com",
+    projectId: "maison-c53c7",
+    storageBucket: "maison-c53c7.firebaseapp.com",
+    messagingSenderId: "720174612151",
+    appId: "1:720174612151:web:d7af687cce1cf33dde1732"
+};   
+
+// Initialisation Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Variables globales
+let currentUser = null;
+let userBalance = 0;
+let currentSlide = 0;
+
+// Configuration des produits
+const PRODUCT_CONFIG = {
+    1: {
+        dailyRevenue: 300,
+        cycleDuration: 17,
+        totalRevenue: 5100,
+        price: 2200,
+        limit: 1
+    },
+    2: {
+        dailyRevenue: 600,
+        cycleDuration: 20,
+        totalRevenue: 12000,
+        price: 5100,
+        limit: 2
+    },
+    3: {
+        dailyRevenue: 1200,
+        cycleDuration: 21,
+        totalRevenue: 25200,
+        price: 12500,
+        limit: 2
+    },
+    4: {
+        dailyRevenue: 2500,
+        cycleDuration: 21,
+        totalRevenue: 52500,
+        price: 25500,
+        limit: 2
+    },
+    5: {
+        dailyRevenue: 5200,
+        cycleDuration: 21,
+        totalRevenue: 109200,
+        price: 52500,
+        limit: 2
+    },
+    6: {
+        dailyRevenue: 10200,
+        cycleDuration: 21,
+        totalRevenue: 214200,
+        price: 109200,
+        limit: 4
+    },
+    7: {
+        dailyRevenue: 20450,
+        cycleDuration: 21,
+        totalRevenue: 429450,
+        price: 214200,
+        limit: 4
+    }
+};
+    
+
+
+// Gestion du slider
+function goToSlide(slideIndex) {
+    const slides = document.querySelectorAll('.slide');
+    if (!slides.length) return;
+    
+    currentSlide = slideIndex;
+    slides.forEach((slide, index) => {
+        slide.style.display = index === slideIndex ? 'block' : 'none';
+    });
+}
+
+function nextSlide() {
+    const slides = document.querySelectorAll('.slide');
+    if (!slides.length) return;
+    goToSlide((currentSlide + 1) % slides.length);
+}
+
+// Démarrer le défilement automatique
+setInterval(nextSlide, 5000);
+
+// Système de notification
+function showNotification(message, type) {
+    const notification = document.querySelector('.notification');
+    if (!notification) return;
+    
+    notification.textContent = message;
+    notification.style.display = 'block';
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 3000);
+}
+
+// Gestion des bonus de parrainage
+async function processReferralBonus(amount, userId) {
+    try {
+        const userRef = ref(db, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+
+        if (!userData?.referredBy) return;
+
+        const referrerUid = userData.referredBy;
+        const bonusAmount = amount * 0.10;
+
+        const referrerRef = ref(db, `users/${referrerUid}`);
+        const referrerSnapshot = await get(referrerRef);
+        
+        if (referrerSnapshot.exists()) {
+            const referrerData = referrerSnapshot.val();
+            const updates = {};
+
+            updates[`users/${referrerUid}/balance`] = (referrerData.balance || 0) + bonusAmount;
+            updates[`users/${referrerUid}/totalReferralBonus`] = (referrerData.totalReferralBonus || 0) + bonusAmount;
+            updates[`users/${userId}/totalBonusGenerated`] = (userData.totalBonusGenerated || 0) + bonusAmount;
+
+            const bonusLogRef = ref(db, `bonusLogs/${referrerUid}`);
+            const newBonusRef = push(bonusLogRef);
+            updates[`bonusLogs/${referrerUid}/${newBonusRef.key}`] = {
+                amount: bonusAmount,
+                memberId: userId,
+                investmentAmount: amount,
+                timestamp: serverTimestamp(),
+                type: 'investment_bonus'
+            };
+
+            const notificationRef = ref(db, `notifications/${referrerUid}`);
+            const newNotifRef = push(notificationRef);
+            updates[`notifications/${referrerUid}/${newNotifRef.key}`] = {
+                type: 'referral_bonus',
+                message: `Vous avez reçu un bonus de parrainage de ${bonusAmount.toLocaleString('fr-FR')} FCFA`,
+                amount: bonusAmount,
+                memberId: userId,
+                timestamp: serverTimestamp(),
+                read: false
+            };
+
+            await update(ref(db), updates);
+        }
+    } catch (error) {
+        console.error('Erreur lors du traitement du bonus de parrainage:', error);
+    }
+}
+
+// Vérification des investissements actifs
+async function checkActiveInvestments(userId, productId) {
+    try {
+        const investmentsRef = ref(db, `investments/${userId}`);
+        const snapshot = await get(investmentsRef);
+        
+        if (!snapshot.exists()) return 0;
+        
+        let activeCount = 0;
+        Object.values(snapshot.val()).forEach(investment => {
+            if (investment.productId === productId && 
+                investment.status === 'active' && 
+                investment.remainingDays > 0) {
+                activeCount++;
+            }
+        });
+        
+        return activeCount;
+    } catch (error) {
+        console.error('Erreur lors de la vérification des investissements:', error);
+        return 0;
+    }
+}
+
+// Mise à jour des limites d'investissement
+async function updateInvestmentLimits(userId) {
+    try {
+        for (const productId in PRODUCT_CONFIG) {
+            const activeInvestments = await checkActiveInvestments(userId, Number(productId));
+            const remainingPurchases = PRODUCT_CONFIG[productId].limit - activeInvestments;
+            const limitSpan = document.getElementById(`purchaseLimit${productId}`);
+            
+            if (limitSpan) {
+                limitSpan.textContent = `${remainingPurchases} achat${remainingPurchases > 1 ? 's' : ''} restant${remainingPurchases > 1 ? 's' : ''}`;
+            }
+
+            const investBtn = document.querySelector(`[onclick="investProduct(${productId}, ${PRODUCT_CONFIG[productId].price})"]`);
+            if (investBtn) {
+                investBtn.disabled = remainingPurchases <= 0;
+                if (remainingPurchases <= 0) {
+                    investBtn.textContent = 'Limite atteinte';
+                    investBtn.style.backgroundColor = '#999';
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour des limites:', error);
+    }
+}
+
+// Fonction d'investissement
+window.investProduct = async function(productId, amount) {
+    if (!currentUser) {
+        showNotification("Veuillez vous connecter pour investir", "error");
+        return;
+    }
+
+    try {
+        const productConfig = PRODUCT_CONFIG[productId];
+        const activeInvestments = await checkActiveInvestments(currentUser.uid, productId);
+        
+        if (activeInvestments >= productConfig.limit) {
+            showNotification("Vous avez atteint la limite d'achat pour ce produit", "error");
+            return;
+        }
+
+        if (userBalance < amount) {
+            showNotification("Solde insuffisant pour cet investissement", "error");
+            return;
+        }
+
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const investmentsRef = ref(db, `investments/${currentUser.uid}`);
+        const currentDate = new Date();
+
+        const updates = {};
+        updates[`users/${currentUser.uid}/balance`] = userBalance - amount;
+        updates[`users/${currentUser.uid}/totalInvestments`] = serverTimestamp();
+
+        const newInvestmentRef = push(investmentsRef);
+        updates[`investments/${currentUser.uid}/${newInvestmentRef.key}`] = {
+            productId: productId,
+            amount: amount,
+            startDate: currentDate.toISOString(),
+            endDate: new Date(currentDate.getTime() + (productConfig.cycleDuration * 24 * 60 * 60 * 1000)).toISOString(),
+            status: 'active',
+            remainingDays: productConfig.cycleDuration,
+            dailyRevenue: productConfig.dailyRevenue,
+            totalRevenue: productConfig.totalRevenue,
+            collectedRevenue: 0,
+            lastCollection: currentDate.toISOString(),
+            timestamp: serverTimestamp()
+        };
+
+        await update(ref(db), updates);
+        await processReferralBonus(amount, currentUser.uid);
+
+        userBalance -= amount;
+        await updateInvestmentLimits(currentUser.uid);
+        showNotification("Investissement réussi!", "success");
+
+        setTimeout(() => {
+            window.location.href = 'machine.html';
+        }, 2000);
+    } catch (error) {
+        console.error("Erreur lors de l'investissement:", error);
+        showNotification("Une erreur est survenue lors de l'investissement", "error");
+    }
+};
+
+// Traitement des revenus d'investissement
+async function processInvestmentRevenues() {
+    if (!currentUser) return;
+
+    try {
+        const investmentsRef = ref(db, `investments/${currentUser.uid}`);
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const snapshot = await get(investmentsRef);
+
+        if (!snapshot.exists()) return;
+
+        const currentDate = new Date();
+        let totalRevenue = 0;
+        const updates = {};
+
+        for (const [investmentId, investment] of Object.entries(snapshot.val())) {
+            if (investment.status !== 'active' || investment.remainingDays <= 0) continue;
+
+            const lastCollection = new Date(investment.lastCollection);
+            const daysSinceLastCollection = Math.floor((currentDate - lastCollection) / (24 * 60 * 60 * 1000));
+
+            if (daysSinceLastCollection > 0) {
+                const daysToProcess = Math.min(daysSinceLastCollection, investment.remainingDays);
+                const newRevenue = daysToProcess * investment.dailyRevenue;
+                
+                totalRevenue += newRevenue;
+                const newRemainingDays = investment.remainingDays - daysToProcess;
+
+                updates[`investments/${currentUser.uid}/${investmentId}/remainingDays`] = newRemainingDays;
+                updates[`investments/${currentUser.uid}/${investmentId}/lastCollection`] = currentDate.toISOString();
+                updates[`investments/${currentUser.uid}/${investmentId}/collectedRevenue`] = 
+                    (investment.collectedRevenue || 0) + newRevenue;
+
+                if (newRemainingDays <= 0) {
+                    updates[`investments/${currentUser.uid}/${investmentId}/status`] = 'completed';
+                }
+            }
+        }
+
+        if (totalRevenue > 0) {
+            const userSnapshot = await get(userRef);
+            const currentBalance = userSnapshot.val().balance || 0;
+            updates[`users/${currentUser.uid}/balance`] = currentBalance + totalRevenue;
+            
+            await update(ref(db), updates);
+            userBalance = currentBalance + totalRevenue;
+        }
+    } catch (error) {
+        console.error('Erreur lors du traitement des revenus:', error);
+    }
+}
+
+// Gestion de l'état de l'authentification
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        currentUser = user;
+        try {
+            const userRef = ref(db, `users/${user.uid}`);
+            const snapshot = await get(userRef);
+            
+            if (snapshot.exists()) {
+                userBalance = snapshot.val().balance || 0;
+                await updateInvestmentLimits(user.uid);
+                await processInvestmentRevenues();
+            } else {
+                showNotification("Erreur lors du chargement du solde", "error");
+            }
+        } catch (error) {
+            console.error('Erreur lors du chargement des données utilisateur:', error);
+            showNotification("Erreur lors du chargement des données", "error");
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
+});
+
+// Gestion des erreurs globales
+window.addEventListener('error', (error) => {
+    console.error('Une erreur est survenue:', error);
+    showNotification('Une erreur inattendue est survenue', 'error');
+});
+
+// Fonction de déconnexion
+window.handleLogout = async function() {
+    try {
+        await auth.signOut();
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+        showNotification('Erreur lors de la déconnexion', 'error');
+    }
+};
+</script>
+</body>
+</html>

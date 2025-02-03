@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Promo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9eeff 100%);
+        }
+
+        .popup {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 380px;
+            transform: translateY(-20px);
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        input::placeholder {
+            color: #a0aec0;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        .cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .apply {
+            background: #4299e1;
+            color: white;
+        }
+
+        .apply:hover {
+            background: #3182ce;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+        }
+
+        /* Animation de clic pour les boutons */
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="popup">
+        <h2>Code bonus</h2>
+        <input type="text" placeholder="Entrez votre code" autocomplete="off">
+        <div class="buttons">
+            <button class="cancel">Annuler</button>
+            <button class="apply">Validé</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import des modules Firebase nécessaires
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+        import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
+            authDomain: "maison-c53c7.firebaseapp.com",
+            databaseURL: "https://maison-c53c7-default-rtdb.firebaseio.com",
+            projectId: "maison-c53c7",
+            storageBucket: "maison-c53c7.firebasestorage.app",
+            messagingSenderId: "720174612151",
+            appId: "1:720174612151:web:d7af687cce1cf33dde1732"
+        };
+ 
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        // Référence à la collection des codes bonus
+        const bonusCodesRef = ref(db, 'bonusCodes');
+
+        // Fonction pour copier le code
+        window.copyCode = function(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.textContent = 'Copié !';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copier';
+                }, 2000);
+            });
+        };
+
+        // Gestion de la validation du code
+        const applyButton = document.querySelector('.apply');
+        const cancelButton = document.querySelector('.cancel');
+        const codeInput = document.querySelector('input');
+
+        applyButton.addEventListener('click', async () => {
+            const enteredCode = codeInput.value.trim().toUpperCase();
+            
+            try {
+                const snapshot = await get(bonusCodesRef);
+                const codesData = snapshot.val();
+                
+                const matchedCode = Object.entries(codesData || {}).find(
+                    ([key, codeObj]) => 
+                        codeObj.code === enteredCode && 
+                        !codeObj.used && 
+                        Date.now() < codeObj.expiresAt
+                );
+
+                if (matchedCode) {
+                    const [codeKey, codeObj] = matchedCode;
+                    // Logique de validation du code
+                    alert(`Code valide ! Montant: ${codeObj.amount} FCFA`);
+                    
+                    // Marquer le code comme utilisé
+                    await set(ref(db, `bonusCodes/${codeKey}/used`), true);
+                    
+                    codeInput.value = '';
+                } else {
+                    alert('Code invalide ou expiré');
+                }
+            } catch (error) {
+                console.error('Erreur de validation:', error);
+                alert('Une erreur est survenue');
+            }
+        });
+
+        cancelButton.addEventListener('click', () => {
+            codeInput.value = '';
+        });
+    </script>
+</body>
+</html>

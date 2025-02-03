@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique des retraits</title>
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --success-color: #4CAF50;
+            --warning-color: #FFA000;
+            --background-color: #f8f9fa;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .header {
+            padding: 20px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .back-arrow {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 16px;
+            color: #000;
+            text-decoration: none;
+            transition: background-color var(--transition-speed);
+        }
+
+        .back-arrow:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .back-arrow span {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #000;
+            font-weight: 600;
+        }
+
+        .card {
+            background: white;
+            margin: 16px;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transform: translateY(0);
+            transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(0,0,0,0.1), 0 4px 6px -1px rgba(0,0,0,0.06);
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .row:first-child {
+            padding-top: 0;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+            transition: opacity var(--transition-speed);
+        }
+
+        .card:hover .icon {
+            opacity: 1;
+        }
+
+        .label {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .value {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .black-text {
+            color: #000;
+        }
+
+        .blue-text {
+            color: var(--primary-color);
+        }
+
+        .orange-text {
+            color: var(--warning-color);
+        }
+
+        .no-history {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 16px;
+            background: white;
+            margin: 20px;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        #history-container {
+            padding-bottom: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                margin: 12px;
+                padding: 16px;
+            }
+
+            .label {
+                font-size: 14px;
+            }
+
+            .value {
+                font-size: 14px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="" class="back-arrow"><span></span></a>
+        <h1>Historique des retraits</h1>
+    </div>
+
+    <div id="history-container"></div>
+
+   <script type="module">
+// Import des modules Firebase nécessaires
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue, push, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
+    authDomain: "maison-c53c7.firebaseapp.com",
+    databaseURL: "https://maison-c53c7-default-rtdb.firebaseio.com",
+    projectId: "maison-c53c7",
+    storageBucket: "maison-c53c7.firebasestorage.app",
+    messagingSenderId: "720174612151",
+    appId: "1:720174612151:web:d7af687cce1cf33dde1732"
+};
+ 
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        function formatAmount(amount) {
+            return `${amount.toLocaleString('fr-FR')} FCFA`;
+        }
+
+        function formatDate(timestamp) {
+            return new Date(timestamp).toLocaleString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function createWithdrawalCard(withdrawal) {
+            return `
+                <div class="card">
+                    <div class="row">
+                        <div class="left-section">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMSA1bC0xMCA5LTEwLTkiLz48cGF0aCBkPSJNMjEgMTlsLTEwLTktMTAgOSIvPjwvc3ZnPg==" alt="Retirer" class="icon">
+                            <span class="label black-text">Montant demandé</span>
+                        </div>
+                        <span class="value black-text">${formatAmount(withdrawal.amount)}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="left-section">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBvbHlsaW5lIHBvaW50cz0iMTIgNiAxMiAxMiAxNiAxNCIvPjwvc3ZnPg==" alt="Temps" class="icon">
+                            <span class="label">Date de demande</span>
+                        </div>
+                        <span class="value">${formatDate(withdrawal.timestamp)}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="left-section">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PGxpbmUgeDE9IjEyIiB5MT0iMTYiIHgyPSIxMiIgeTI9IjEyIi8+PGxpbmUgeDE9IjEyIiB5MT0iOCIgeDI9IjEyIiB5Mj0iOCIvPjwvc3ZnPg==" alt="Statut" class="icon">
+                            <span class="label">Statut</span>
+                        </div>
+                        <span class="value blue-text">${withdrawal.status}</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="left-section">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PGxpbmUgeDE9IjEyIiB5MT0iOCIgeDI9IjEyIiB5Mj0iMTYiLz48bGluZSB4MT0iOCIgeTE9IjEyIiB4Mj0iMTYiIHkyPSIxMiIvPjwvc3ZnPg==" alt="Montant" class="icon">
+                            <span class="label">Montant net</span>
+                        </div>
+                        <span class="value orange-text">${formatAmount(withdrawal.amount - withdrawal.fees)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayWithdrawalHistory(history) {
+            const container = document.getElementById('history-container');
+            
+            if (!history || Object.keys(history).length === 0) {
+                container.innerHTML = `
+                    <div class="no-history">
+                        Aucun historique de retrait disponible
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            Object.entries(history)
+                .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+                .forEach(([key, withdrawal]) => {
+                    container.innerHTML += createWithdrawalCard(withdrawal);
+                });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const historyRef = ref(database, `users/${user.uid}/withdrawalHistory`);
+                onValue(historyRef, (snapshot) => {
+                    const history = snapshot.val();
+                    displayWithdrawalHistory(history);
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.querySelector('.back-arrow').addEventListener('click', (e) => {
+            e.preventDefault();
+            history.back();
+        });
+    </script>
+</body>
+</html>

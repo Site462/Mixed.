@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Banking</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reset et styles de base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Section balance */
+        .balance-section {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+                            url('https://image.noelshack.com/fichiers/2025/05/5/1738280554-images-17.jpeg');
+            background-size: cover;
+            background-position: center;
+            padding: 25px;
+            color: white;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            object-fit: contain;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .identifier {
+            font-size: 16px;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .balance-content {
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .balance-label {
+            font-size: 24px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Boutons balance */
+        .balance-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        .balance-button {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .balance-button.withdraw {
+            background: linear-gradient(to right, #FF416C, #FF4B2B);
+            color: white;
+        }
+
+        .balance-button.recharge {
+            background: linear-gradient(to right, #00C9FF, #92FE9D);
+            color: white;
+        }
+
+        /* Boutons d'action */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px;
+            margin-bottom: 90px;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: white;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .action-button i {
+            font-size: 18px;
+            margin-right: 15px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Couleurs spécifiques pour les icônes */
+        .btn-history i { color: #00C9FF; }
+        .btn-recharge-history i { color: #FC466B; }
+        .btn-deposit i { color: #4CAF50; }
+        .btn-config i { color: #2196F3; }
+        .btn-card i { color: #FF9800; }
+        .btn-products i { color: #F44336; }
+        .btn-help i { color: #607D8B; }
+        .btn-bonus i { color: #FFD700; }
+        .btn-logout i { color: #FF5722; }
+
+        /* Menu de navigation fixe mis à jour */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 8px 0;
+            box-shadow: 0 -1px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #707070;
+            min-width: 64px;
+            padding: 8px 0;
+            border: none;
+            background: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .nav-button span {
+            font-size: 12px;
+        }
+
+        .nav-button.active {
+            color: #0066FF;
+        }
+
+        .nav-button.active svg {
+            stroke: #0066FF;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .balance-section {
+                min-height: 200px;
+                padding: 20px;
+            }
+
+            .balance-amount {
+                font-size: 32px;
+            }
+
+            .balance-label {
+                font-size: 20px;
+            }
+
+            .action-buttons {
+                margin: 15px;
+                margin-bottom: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Section balance -->
+    <div class="balance-section">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://image.noelshack.com/fichiers/2025/05/5/1738280554-images-17.jpeg" alt="Logo" class="logo">
+                <span class="identifier" id="user-identifier">Chargement...</span>
+            </div>
+        </div>
+        
+        <div class="balance-content">
+            <div class="balance-label">Mon argent</div>
+            <div id="user-balance" class="balance-amount">00,00 XOF</div>
+            
+            <div class="balance-buttons">
+                <a href="retrait.html" class="balance-button withdraw">
+                    <i class="fas fa-arrow-down"></i>
+                    Retirer
+                </a>
+                <a href="recharge.html" class="balance-button recharge">
+                    <i class="fas fa-arrow-up"></i>
+                    Recharger
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="action-buttons">
+        <a href="historique-retrait.html" class="action-button btn-history">
+            <i class="fas fa-history"></i>
+            <span>Historique de retrait</span>
+        </a>
+
+        <a href="code.html" class="action-button btn-bonus">
+            <i class="fas fa-gift"></i>
+            <span>Miette</span>
+        </a>
+
+        <a href="history.html" class="action-button btn-recharge-history">
+            <i class="fas fa-sync"></i>
+            <span>Historique de recharge</span>
+        </a>
+        
+        <a href="portefeuille.html" class="action-button btn-config">
+            <i class="fas fa-cog"></i>
+            <span>Configuration de compte de retrait</span>
+        </a>
+        
+        <a href="carte.html" class="action-button btn-card">
+            <i class="fas fa-credit-card"></i>
+            <span>Carte bancaire</span>
+        </a>
+        
+        <a href="panneau.html" class="action-button btn-products">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Mes louaeé</span>
+        </a>
+        
+        <a href="service.html" class="action-button btn-help">
+            <i class="fas fa-question-circle"></i>
+            <span>Centre d'aide</span>
+        </a>
+        
+        <a href="index.html" class="action-button btn-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Déconnexion</span>
+        </a>
+    </div>
+
+    <!-- Menu de navigation fixe mis à jour -->
+    <nav class="bottom-nav">
+        <div class="nav-buttons">
+            <a href="#" class="nav-button active">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
+                <span>Immobilier</span>
+            </a>
+
+            <a href="historique.html" class="nav-button">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Historique</span>
+            </a>
+
+            <a href="mon-equipe.html" class="nav-button">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Team</span>
+            </a>
+
+            <a href="compte.html" class="nav-button">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Compte</span>
+            </a>
+        </div>
+    </nav>
+    
+    <script type="module">
+// Import des modules Firebase nécessaires
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
+    authDomain: "maison-c53c7.firebaseapp.com",
+    databaseURL: "https://maison-c53c7-default-rtdb.firebaseio.com",
+    projectId: "maison-c53c7",
+    storageBucket: "maison-c53c7.firebasestorage.app",
+    messagingSenderId: "720174612151",
+    appId: "1:720174612151:web:d7af687cce1cf33dde1732"
+};
+
+
+        // Initialisation Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Fonction pour mettre à jour l'identifiant
+        function updateUserIdentifier(phoneNumber) {
+            const identifierElement = document.getElementById('user-identifier');
+            if (identifierElement && phoneNumber) {
+                const formattedNumber = phoneNumber.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+                identifierElement.textContent = formattedNumber;
+            }
+        }
+
+        // Fonction pour mettre à jour la balance
+        function updateUserBalance(balance) {
+            const balanceElement = document.getElementById('user-balance');
+            if (balanceElement) {
+                balanceElement.textContent = `${balance || '00,00'} XOF`;
+            }
+        }
+
+        // Configuration des animations
+        function createAnimatedShapes() {
+            const container = document.getElementById('shape-container');
+            
+            // Palette de couleurs
+            const colors = [
+                '#3498db', '#2980b9', '#1abc9c', '#16a085', 
+                '#2ecc71', '#27ae60', '#34495e', '#2c3e50'
+            ];
+            
+            // Types de formes
+            const shapes = ['circle', 'square', 'triangle'];
+            
+            // Tailles
+            const sizes = [40, 60, 80, 100, 120, 150];
+            
+            // Création des formes
+            for (let i = 0; i < 12; i++) {
+                const shape = document.createElement('div');
+                const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                shape.classList.add('animated-shape', shapeType);
+                
+                const size = sizes[Math.floor(Math.random() * sizes.length)];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const rotation = Math.random() * 360;
+                const opacity = 0.1 + Math.random() * 0.4;
+                const top = Math.random() * (window.innerHeight - size);
+                const left = Math.random() * (window.innerWidth - size);
+                const duration = 15 + Math.random() * 20;
+                const delay = Math.random() * -20;
+                
+                Object.assign(shape.style, {
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    backgroundColor: color,
+                    top: `${top}px`,
+                    left: `${left}px`,
+                    opacity: opacity,
+                    transform: `rotate(${rotation}deg)`,
+                    position: 'fixed',
+                    zIndex: '-1',
+                    animation: `float ${duration}s infinite ${delay}s`,
+                    transition: 'all 0.3s ease-in-out'
+                });
+                
+                container.appendChild(shape);
+            }
+        }
+
+        // Ajout des styles pour l'animation
+        const animationStyles = `
+            .animated-shape {
+                border-radius: 50%;
+                pointer-events: all;
+            }
+            
+            .square {
+                border-radius: 0;
+            }
+            
+            .triangle {
+                width: 0 !important;
+                height: 0 !important;
+                background-color: transparent !important;
+                border-left: 50px solid transparent;
+                border-right: 50px solid transparent;
+                border-bottom: 86px solid currentColor;
+            }
+            
+            @keyframes float {
+                0% {
+                    transform: translate(0, 0) rotate(0deg);
+                }
+                33% {
+                    transform: translate(100px, -100px) rotate(120deg);
+                }
+                66% {
+                    transform: translate(-100px, 100px) rotate(240deg);
+                }
+                100% {
+                    transform: translate(0, 0) rotate(360deg);
+                }
+            }
+        `;
+
+        // Gestion de l'authentification
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userRef = ref(database, 'users/' + user.uid);
+                    const snapshot = await get(userRef);
+                    const userData = snapshot.val();
+
+                    if (userData) {
+                        if (userData.phoneNumber) {
+                            updateUserIdentifier(userData.phoneNumber);
+                        }
+                        if (userData.balance) {
+                            updateUserBalance(userData.balance);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la récupération des données:", error);
+                }
+            } else {
+                updateUserIdentifier("Non connecté");
+                updateUserBalance("00,00");
+            }
+        });
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ajout des styles d'animation
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = animationStyles;
+            document.head.appendChild(styleSheet);
+
+            // Création du conteneur pour les formes si nécessaire
+            if (!document.getElementById('shape-container')) {
+                const container = document.createElement('div');
+                container.id = 'shape-container';
+                document.body.appendChild(container);
+            }
+
+            // Initialisation des animations
+            createAnimatedShapes();
+            
+            // Gestion des erreurs de chargement d'image
+            const logoImg = document.querySelector('.logo');
+            if (logoImg) {
+                logoImg.onerror = function() {
+                    this.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PC9zdmc+';
+                };
+            }
+        });
+</script>
+</body>
+</html>

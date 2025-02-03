@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Générateur de Bonus</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4CAF50;
+            --danger: #ef233c;
+            --dark: #2b2d42;
+            --light: #f8f9fa;
+            --gray: #8d99ae;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1, h2 {
+            color: var(--dark);
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 40px 0;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 1.1em;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-1px);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+        }
+        
+        .code-display {
+            margin: 15px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
+        
+        .timer {
+            color: var(--gray);
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .history {
+            margin-top: 30px;
+        }
+
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #f8f9fa;
+        }
+
+        .expired {
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+        }
+
+        .status-expired {
+            background: rgba(239, 35, 60, 0.1);
+            color: var(--danger);
+        }
+
+        .status-used {
+            background: rgba(141, 153, 174, 0.1);
+            color: var(--gray);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Générateur de Codes Bonus</h1>
+        
+        <div class="card">
+            <div class="input-group">
+                <label>Montant du bonus</label>
+                <input type="number" id="amount" placeholder="Entrez le montant en euros">
+            </div>
+            <button class="btn" onclick="generateCode()">Générer un Code Bonus</button>
+            <div id="result" class="result"></div>
+        </div>
+
+        <div class="card">
+            <div class="history" id="history">
+                <h2>Historique des codes</h2>
+            </div>
+        </div>
+    </div>
+
+      <script type="module">
+// Import des modules Firebase nécessaires
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
+
+// Configuration Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
+    authDomain: "maison-c53c7.firebaseapp.com",
+    databaseURL: "https://maison-c53c7-default-rtdb.firebaseio.com",
+    projectId: "maison-c53c7",
+    storageBucket: "maison-c53c7.firebasestorage.app",
+    messagingSenderId: "720174612151",
+    appId: "1:720174612151:web:d7af687cce1cf33dde1732"
+};
+
+// Initialiser Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+// Référence à la collection des codes bonus
+const bonusCodesRef = ref(db, 'bonusCodes');
+
+// Fonction pour copier le code
+window.copyCode = function(code) {
+    navigator.clipboard.writeText(code).then(() => {
+        const copyBtn = document.querySelector('.copy-btn');
+        copyBtn.textContent = 'Copié !';
+        setTimeout(() => {
+            copyBtn.textContent = 'Copier';
+        }, 2000);
+    });
+};
+
+// Fonction pour générer un code
+window.generateCode = async function() {
+    const amount = document.getElementById('amount').value;
+    if (!amount) {
+        showResult('Veuillez entrer un montant.', 'error');
+        return;
+    }
+
+    try {
+        const timestamp = Date.now();
+        const randomPart = Math.random().toString(36).substring(2, 8);
+        const code = `${randomPart}${timestamp}`.substring(0, 12).toUpperCase();
+
+        const codeData = {
+            code: code,
+            amount: Number(amount),
+            timestamp: timestamp,
+            used: false,
+            expiresAt: timestamp + (5 * 60 * 1000), // 5 minutes
+            createdAt: timestamp
+        };
+
+        // Sauvegarder dans Firebase
+        const newCodeRef = push(bonusCodesRef);
+        await set(newCodeRef, codeData);
+
+        // Afficher le résultat
+        const result = document.getElementById('result');
+        result.style.display = 'block';
+        result.innerHTML = `
+            <div>Code bonus généré :</div>
+            <div class="code-display">
+                ${code}
+                <button class="copy-btn" onclick="copyCode('${code}')">Copier</button>
+            </div>
+            <div class="timer">Ce code expirera dans 5 minutes</div>
+        `;
+        result.classList.add('fade-in');
+    } catch (error) {
+        console.error('Erreur lors de la génération du code:', error);
+        showResult('Une erreur est survenue lors de la génération du code.', 'error');
+    }
+};
+
+// Fonction pour afficher les messages de résultat
+function showResult(message, type) {
+    const result = document.getElementById('result');
+    result.innerHTML = message;
+    result.className = `result ${type}`;
+    result.style.display = 'block';
+}
+
+// Écouter les changements dans la base de données
+onValue(bonusCodesRef, (snapshot) => {
+    const data = snapshot.val();
+    updateHistory(data);
+});
+
+// Fonction pour mettre à jour l'historique
+function updateHistory(data) {
+    const historyDiv = document.getElementById('history');
+    const currentTime = Date.now();
+    
+    let historyHTML = '<h2>Historique des codes</h2>';
+    
+    if (data) {
+        Object.values(data)
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .forEach(codeObj => {
+                const isExpired = currentTime > codeObj.expiresAt;
+                const status = codeObj.used ? 'used' : 
+                            isExpired ? 'expired' : 
+                            'active';
+                
+                const statusText = {
+                    'used': 'Utilisé',
+                    'expired': 'Expiré',
+                    'active': 'Actif'
+                }[status];
+                
+                historyHTML += `
+                    <div class="history-item ${status === 'expired' ? 'expired' : ''} fade-in">
+                        <div>
+                            <strong>${codeObj.code}</strong><br>
+                            Montant: ${codeObj.amount}€<br>
+                            <small>${new Date(codeObj.createdAt).toLocaleString()}</small>
+                        </div>
+                        <div class="status status-${status}">${statusText}</div>
+                    </div>
+                `;
+            });
+    }
+    
+    historyDiv.innerHTML = historyHTML;
+}
+</script>
+</body>
+</html>
