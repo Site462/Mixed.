@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recharge de Crédit</title>
+    <title>Historique des Recharges</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #000000;
-            --secondary-color: linear-gradient(45deg, #FF0000, #00FF00, #0000FF, #FFFF00);
-            --input-bg: rgba(255,255,255,0.1);
-            --input-border: rgba(255,255,255,0.3);
+       :root {
+            --primary-color: #4ecdc4;  /* Turquoise vif */
+            --success-color: #00ff87;  /* Vert fluo */
+            --warning-color: #ffd700;  /* Or brillant */
+            --error-color: #ff4d4d;    /* Rouge vif */
+            --bg-color: #121212;       /* Noir profond */
+            --card-bg: #1e1e1e;        /* Gris très sombre */
+            --text-primary: #e0e0e0;   /* Gris clair */
+            --text-secondary: #888888; /* Gris moyen */
+            --border-color: #333333;   /* Bordure gris très sombre */
+            --shadow: 0 2px 8px rgba(78, 205, 196, 0.2);  /* Ombre avec la couleur primaire */
         }
 
         * {
@@ -19,369 +27,208 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #1A1A1A;
-            color: #FFFFFF;
-            line-height: 1.6;
-            perspective: 1000px;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            min-height: 100vh;
+            padding: 1rem;
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.5;
         }
 
         .container {
-            background: linear-gradient(135deg, #333333, #000000);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(255,255,255,0.1);
-            transform-style: preserve-3d;
-            transform: rotateX(10deg);
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
         }
 
         h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
             text-align: center;
-            color: #FFFFFF;
-            margin-bottom: 2rem;
-            background: linear-gradient(45deg, #00FF00, #0000FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(45deg, #00FF00, #0000FF);
+        h1 i {
+            color: var(--primary-color);
         }
 
-        .operator-grid {
+        .history-item {
+            background: var(--card-bg);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
-            margin-bottom: 2rem;
+            transition: all 0.2s ease;
         }
 
-        .operator-option {
-            position: relative;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s ease;
+        .history-item:hover {
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
         }
 
-        .operator-option input[type="radio"] {
-            display: none;
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-group i {
+            width: 16px;
+            color: var(--primary-color);
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status i {
+            font-size: 0.8rem;
+        }
+
+        .status-success {
+            background: rgba(0, 255, 135, 0.2);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--warning-color);
+        }
+
+        .status-failed {
+            background: rgba(255, 77, 77, 0.2);
+            color: var(--error-color);
         }
 
         .operator-logo {
-            background: rgba(255,255,255,0.1);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
-            padding: 1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            transform-style: preserve-3d;
-        }
-
-        .operator-logo svg {
-            width: 48px;
-            height: 48px;
-            transform: translateZ(20px);
-        }
-
-        .operator-option input[type="radio"]:checked + .operator-logo {
-            border-color: #00FF00;
-            background: linear-gradient(135deg, rgba(0,255,0,0.2), rgba(0,0,255,0.2));
-            transform: scale(1.05) translateZ(30px);
-        }
-
-        .form-group {
-            position: relative;
-            margin-bottom: 2rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-            color: #00FF00;
-            transition: color 0.3s ease;
-        }
-
-        input {
-            width: 100%;
-            padding: 1rem;
-            background: var(--input-bg);
-            border: 2px solid var(--input-border);
-            border-radius: 10px;
-            color: #FFFFFF;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #00FF00;
-            box-shadow: 0 0 15px rgba(0,255,0,0.5);
-            transform: scale(1.02);
-        }
-
-        .help-text {
-            display: block;
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.7);
-            margin-top: 0.5rem;
-        }
-
-        .error {
-            color: #FF00FF;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        button {
-            background: linear-gradient(45deg, #00FF00, #0000FF);
-            color: #FFFFFF;
-            padding: 1rem;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
+            background: #2a2a2a;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border-color);
         }
 
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: all 0.6s;
+        .operator-logo i {
+            font-size: 1.2rem;
+            color: var(--primary-color);
         }
 
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,255,0,0.4);
-        }
-
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
+        .reject-reason {
+            grid-column: 1 / -1;
+            background: rgba(255, 77, 77, 0.1);
+            padding: 0.5rem;
+            border-radius: 4px;
+            color: var(--error-color);
+            font-size: 0.75rem;
+            display: flex;
             align-items: center;
-            z-index: 1000;
+            gap: 0.5rem;
+            border: 1px solid rgba(255, 77, 77, 0.3);
         }
 
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255,255,255,0.2);
-            border-top: 4px solid #00FF00;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .processing-info {
+            grid-column: 1 / -1;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .no-records {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px dashed var(--border-color);
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
             .container {
                 padding: 1rem;
-                transform: none;
+                margin: 0;
             }
 
-            .operator-grid {
-                grid-template-columns: repeat(3, 1fr);
+            .history-item {
+                grid-template-columns: 1fr;
+                padding: 0.8rem;
             }
-        }
+
+            h1 {
+                font-size: 1.2rem;
+            }
+        } 
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Recharge</h1>
-        <form id="rechargeForm">
-            <div class="operator-grid">
-                <label class="operator-option">
-                    <input type="radio" name="operator" value="mtn" required>
-                    <div class="operator-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#FDB913"/>
-                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">MTN</text>
-                        </svg>
-                        <span>MTN</span>
-                    </div>
-                </label>
-                <label class="operator-option">
-                    <input type="radio" name="operator" value="moov" required>
-                    <div class="operator-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#00A3E0"/>
-                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">MOOV</text>
-                        </svg>
-                        <span>Moov</span>
-                    </div>
-                </label>
-                <label class="operator-option">
-                    <input type="radio" name="operator" value="orange" required>
-                    <div class="operator-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#FF6600"/>
-                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="5">ORANGE</text>
-                        </svg>
-                        <span>Orange</span>
-                    </div>
-                </label>
-                <label class="operator-option">
-                    <input type="radio" name="operator" value="wave" required>
-                    <div class="operator-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#1DC1EC"/>
-                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">WAVE</text>
-                        </svg>
-                        <span>Wave</span>
-                    </div>
-                </label>
-                <label class="operator-option">
-                    <input type="radio" name="operator" value="usdt" required>
-                    <div class="operator-logo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" fill="#26A17B"/>
-                            <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-family="Arial" font-weight="bold" font-size="6">USDT</text>
-                        </svg>
-                        <span>USDT TRON 20</span>
-                    </div>
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">
-                    <span>📱 Numéro de recharge</span>
-                </label>
-                <input type="tel" id="phone" name="phone" required 
-                       placeholder="Entrez votre numéro de téléphone"
-                       pattern="[0-9]{8,10}"
-                       title="Numéro de 8 à 10 chiffres">
-                <span class="help-text">Format accepté : 8 ou 10 chiffres</span>
-                <div id="phoneError" class="error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="amount">
-                    <span>💰 Montant de recharge</span>
-                </label>
-                <input type="number" id="amount" name="amount" 
-                       min="1" 
-                       placeholder="Minimum 1 FCFA ou 1 USD Tron 20" 
-                       required>
-                <span class="help-text">Montant minimum : 1 FCFA ou 1 USDT Tron 20</span>
-                <div id="amountError" class="error"></div>
-            </div>
-
-            <button type="submit" id="submitButton">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-                Continuer vers le paiement
-            </button>
-        </form>
+        <h1><i class="fas fa-history"></i> Historique des Recharges</h1>
+        <div id="historyList"></div>
     </div>
-
-    <div class="loading">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <script>
-        // Validation des champs de formulaire
-        const form = document.getElementById('rechargeForm');
-        const phoneInput = document.getElementById('phone');
-        const amountInput = document.getElementById('amount');
-        const phoneError = document.getElementById('phoneError');
-        const amountError = document.getElementById('amountError');
-
-        // Validation du numéro de téléphone
-        phoneInput.addEventListener('input', function() {
-            const phonePattern = /^[0-9]{8,10}$/;
-            if (!phonePattern.test(this.value)) {
-                phoneError.textContent = '❌ Numéro invalide. 8 ou 10 chiffres requis.';
-                phoneError.style.opacity = '1';
-            } else {
-                phoneError.textContent = '';
-                phoneError.style.opacity = '0';
-            }
-        });
-
-        // Validation du montant
-        amountInput.addEventListener('input', function() {
-            if (this.value < 1) {
-                amountError.textContent = '❌ Le montant minimum est de 1 FCFA ou 1 USDT';
-                amountError.style.opacity = '1';
-            } else {
-                amountError.textContent = '';
-                amountError.style.opacity = '0';
-            }
-        });
-
-        // Gestion de la soumission du formulaire
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const loading = document.querySelector('.loading');
-            
-            // Validation finale
-            if (!form.checkValidity()) {
-                alert('Veuillez remplir tous les champs correctement');
-                return;
-            }
-
-            // Simulation de chargement
-            loading.style.display = 'flex';
-
-            // Simulation d'envoi (à remplacer par votre logique réelle)
-            setTimeout(() => {
-                loading.style.display = 'none';
-                alert('Recharge en cours de traitement !');
-            }, 2000);
-        });
-    </script>
     
-    <script type="module">
+     <script type="module">
 // Import des modules Firebase nécessaires
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { 
+    getDatabase, 
+    ref, 
+    get, 
+    set, 
+    update,
+    onValue,
+    query,
+    orderByChild,
+    equalTo    // Ajout de l'import pour le filtrage
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js";
 
 // Configuration Firebase
@@ -395,165 +242,230 @@ const firebaseConfig = {
     appId: "1:720174612151:web:d7af687cce1cf33dde1732"
 };
 
+try {
+    // Initialisation de Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const creditedTransactions = new Set();
 
-        // Initialiser Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+    // Fonction de mise à jour du solde utilisateur
+    async function updateUserBalance(userId, amount, transactionId) {
+        if (creditedTransactions.has(transactionId)) return;
 
-        // Dictionnaire des numéros par opérateur
-        const operatorNumbers = {
-            'mtn': 'indisponible',
-            'moov': '',
-            'orange': '+2250700029032',
-            'wave': '+2250554049897',
-            'usdt': 'TArN5XsrxyhtuzxwKQiWNTBsmMm9Brkim9'
+        try {
+            const userRef = ref(db, `users/${userId}`);
+            const snapshot = await get(userRef);
+
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                const currentBalance = userData.solde || 0;
+                const newBalance = currentBalance + parseFloat(amount);
+
+                const updates = {};
+                updates[`users/${userId}/solde`] = newBalance;
+                updates[`transactions/${transactionId}/credited`] = true;
+
+                await update(ref(db), updates);
+                creditedTransactions.add(transactionId);
+            }
+        } catch (error) {
+            console.error('Erreur de mise à jour du solde:', error);
+        }
+    }
+
+    // Fonction de formatage de date
+    function formatDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) throw new Error('Date invalide');
+            
+            return new Intl.DateTimeFormat('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).format(date).replace(',', ' à');
+        } catch (error) {
+            return 'Date non disponible';
+        }
+    }
+
+    // Fonction pour obtenir la classe CSS du statut
+    function getStatusClass(status) {
+        const statusClasses = {
+            success: 'status-success',
+            pending: 'status-pending',
+            failed: 'status-failed'
         };
+        return statusClasses[status] || '';
+    }
 
-        // Fonctions utilitaires
-        function showLoading() {
-            document.querySelector('.loading').style.display = 'flex';
+    // Fonction de traduction du statut
+    function translateStatus(status) {
+        const translations = {
+            success: 'Crédité',
+            pending: 'En cours de vérification',
+            failed: 'Échec'
+        };
+        return translations[status] || status;
+    }
+
+    // Fonction de création d'un élément d'historique
+    function createHistoryItem(transaction, userId) {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.dataset.transactionId = transaction.transactionId || '';
+
+        if (transaction.status === 'success' && !transaction.credited && userId) {
+            updateUserBalance(userId, transaction.amount || 0, transaction.transactionId);
         }
 
-        function hideLoading() {
-            document.querySelector('.loading').style.display = 'none';
+        historyItem.innerHTML = `
+            <div class="history-info">
+                <div class="info-group">
+                    <span class="info-label">Montant</span>
+                    <span class="info-value">${transaction.amount || 0} FCFA</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Numéro rechargé</span>
+                    <span class="info-value">${transaction.phone || 'Non spécifié'}</span>
+                </div>
+            </div>
+            <div class="history-info">
+                <div class="info-group">
+                    <span class="info-label">Opérateur</span>
+                    <span class="info-value">${transaction.operator ? transaction.operator.toUpperCase() : 'Non spécifié'}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">ID Transaction</span>
+                    <span class="info-value">${transaction.transactionId || 'Non spécifié'}</span>
+                </div>
+            </div>
+            <div class="history-info">
+                <div class="info-group">
+                    <span class="info-label">Date</span>
+                    <span class="info-value">${formatDate(transaction.date)}</span>
+                </div>
+                <div class="info-group">
+                    <span class="info-label">Numéro de paiement</span>
+                    <span class="info-value">${transaction.userPaymentNumber || 'Non spécifié'}</span>
+                </div>
+                ${transaction.processedDate ? `
+                    <div class="processing-info">Traité le ${formatDate(transaction.processedDate)}</div>
+                ` : ''}
+                ${transaction.status === 'failed' && transaction.rejectReason ? `
+                    <div class="reject-reason">Motif du rejet: ${transaction.rejectReason}</div>
+                ` : ''}
+                <div class="status ${getStatusClass(transaction.status || 'pending')}">
+                    ${translateStatus(transaction.status || 'pending')}
+                </div>
+            </div>
+        `;
+
+        return historyItem;
+    }
+
+    // Fonction d'affichage des transactions
+    function displayTransactions(transactions, userId) {
+        const historyList = document.getElementById('historyList');
+        if (!historyList) return;
+        
+        if (!transactions || Object.keys(transactions).length === 0) {
+            historyList.innerHTML = '<div class="no-records">Aucune transaction trouvée</div>';
+            return;
         }
 
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
+        // Filtrer les transactions pour ne garder que celles de l'utilisateur courant
+        const userTransactions = Object.entries(transactions)
+            .filter(([_, transaction]) => transaction.userId === userId)
+            .map(([id, transaction]) => ({...transaction, id}))
+            .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 5000);
+        if (userTransactions.length === 0) {
+            historyList.innerHTML = '<div class="no-records">Aucune transaction trouvée</div>';
+            return;
         }
 
-        function showError(elementId, message) {
-            const errorElement = document.getElementById(elementId);
-            errorElement.textContent = message;
-            errorElement.style.display = 'block';
-        }
+        const fragment = document.createDocumentFragment();
+        let hasNewItems = false;
 
-        function clearErrors() {
-            const errorElements = document.querySelectorAll('.error');
-            errorElements.forEach(element => {
-                element.style.display = 'none';
-                element.textContent = '';
-            });
-        }
+        userTransactions.forEach(transaction => {
+            const existingItem = document.querySelector(
+                `[data-transaction-id="${transaction.transactionId}"]`
+            );
 
-        // Validation du numéro de téléphone (8 ou 10 chiffres)
-        function isValidPhoneNumber(phone) {
-            return /^[0-9]{8}$/.test(phone) || /^[0-9]{10}$/.test(phone);
-        }
-
-        // Validation des données
-        function validateForm(operator, phone, amount) {
-            let isValid = true;
-            clearErrors();
-
-            if (!operator) {
-                showError('operatorError', 'Veuillez sélectionner un opérateur');
-                isValid = false;
+            if (existingItem) {
+                const newItem = createHistoryItem(transaction, userId);
+                if (existingItem.innerHTML !== newItem.innerHTML) {
+                    existingItem.parentNode.replaceChild(newItem, existingItem);
+                }
+            } else {
+                fragment.appendChild(createHistoryItem(transaction, userId));
+                hasNewItems = true;
             }
+        });
 
-            if (!isValidPhoneNumber(phone)) {
-                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
-                isValid = false;
+        if (hasNewItems) {
+            if (historyList.children.length === 0) {
+                historyList.appendChild(fragment);
+            } else {
+                historyList.insertBefore(fragment, historyList.firstChild);
             }
-
-           if (amount < 100) {
-                showError('amountError', 'Le montant minimum est de 100 FCFA');
-                isValid = false;
-            }
-
-            return isValid;
         }
 
-        // Vérifier l'authentification au chargement
-        window.addEventListener('load', () => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    showNotification('Veuillez vous connecter pour continuer', 'error-notification');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
+        const currentIds = new Set(userTransactions.map(t => t.transactionId));
+        Array.from(historyList.children).forEach(child => {
+            const id = child.dataset.transactionId;
+            if (id && !currentIds.has(id)) {
+                child.remove();
+            }
+        });
+    }
+
+    // Écouteur d'authentification
+    onAuthStateChanged(auth, (user) => {
+        const historyList = document.getElementById('historyList');
+        if (!historyList) return;
+        
+        if (user) {
+            // Création de la requête avec query, orderByChild et equalTo pour filtrer par userId
+            const transactionsRef = query(
+                ref(db, 'transactions'),
+                orderByChild('userId'),
+                equalTo(user.uid)
+            );
+            
+            // Écoute des changements
+            onValue(transactionsRef, (snapshot) => {
+                try {
+                    const transactions = snapshot.val();
+                    displayTransactions(transactions, user.uid);
+                } catch (error) {
+                    console.error('Erreur lors de la récupération des transactions:', error);
+                    if (historyList) {
+                        historyList.innerHTML = '<div class="no-records">Erreur lors du chargement des transactions</div>';
+                    }
+                }
+            }, (error) => {
+                console.error('Erreur Firebase:', error);
+                if (historyList) {
+                    historyList.innerHTML = '<div class="no-records">Erreur de connexion</div>';
                 }
             });
-        });
+        } else {
+            historyList.innerHTML = '<div class="no-records">Veuillez vous connecter pour voir votre historique</div>';
+        }
+    });
 
-        // Gérer la soumission du formulaire
-        document.getElementById('rechargeForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('Veuillez vous connecter pour continuer', 'error-notification');
-                return;
-            }
-
-            const operator = document.querySelector('input[name="operator"]:checked')?.value;
-            const phone = document.getElementById('phone').value;
-            const amount = parseInt(document.getElementById('amount').value);
-
-            if (!validateForm(operator, phone, amount)) {
-                return;
-            }
-
-            showLoading();
-
-            try {
-                // Créer l'objet de recharge
-                const rechargeData = {
-                    operator: operator,
-                    phone: phone,
-                    amount: amount,
-                    operatorNumber: operatorNumbers[operator],
-                    date: new Date().toISOString(),
-                    userId: user.uid,
-                    userEmail: user.email,
-                    status: 'pending'
-                };
-
-                // Stocker dans sessionStorage
-                sessionStorage.setItem('rechargeData', JSON.stringify(rechargeData));
-
-                // Sauvegarder dans Firebase
-                const rechargeRef = ref(db, `recharges/${user.uid}/${Date.now()}`);
-                await set(rechargeRef, rechargeData);
-
-                // Rediriger vers la page de confirmation
-                window.location.href = 'confirmation.html';
-
-            } catch (error) {
-                console.error('Erreur:', error);
-                showNotification('Une erreur est survenue. Veuillez réessayer.', 'error-notification');
-            } finally {
-                hideLoading();
-            }
-        });
-
-        // Validation en temps réel du numéro de téléphone
-        document.getElementById('phone').addEventListener('input', function(e) {
-            const phone = e.target.value;
-            if (phone && !isValidPhoneNumber(phone)) {
-                showError('phoneError', 'Le numéro doit contenir 8 ou 10 chiffres');
-            } else {
-                document.getElementById('phoneError').style.display = 'none';
-            }
-        });
-
-        // Validation en temps réel du montant
-        document.getElementById('amount').addEventListener('input', function(e) {
-            const amount = parseInt(e.target.value);
-            if (amount < 1) {
-                showError('amountError', 'Le montant minimum est de 1 FCFA');
-            } else {
-                document.getElementById('amountError').style.display = 'none';
-            }
-        });
-    </script>
+} catch (error) {
+    console.error('Erreur d\'initialisation:', error);
+    const historyList = document.getElementById('historyList');
+    if (historyList) {
+        historyList.innerHTML = '<div class="no-records">Erreur d\'initialisation de l\'application</div>';
+    }
+}
+</script>
 </body>
-</html> 
+</html>
