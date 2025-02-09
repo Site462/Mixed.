@@ -209,14 +209,57 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-s
 
 // Configuration
 const VIP_CONFIG = {
-    1: { dailyRevenue: 300, cycleDuration: 17, totalRevenue: 5100, price: 2200, limit: 1 },
-    2: { dailyRevenue: 600, cycleDuration: 20, totalRevenue: 12000, price: 5100, limit: 2 },
-    3: { dailyRevenue: 1200, cycleDuration: 21, totalRevenue: 25200, price: 12500, limit: 2 },
-    4: { dailyRevenue: 2500, cycleDuration: 21, totalRevenue: 52500, price: 25500, limit: 2 },
-    5: { dailyRevenue: 5200, cycleDuration: 21, totalRevenue: 109200, price: 52500, limit: 2 },
-    6: { dailyRevenue: 10200, cycleDuration: 21, totalRevenue: 214200, price: 109200, limit: 4 },
-    7: { dailyRevenue: 20450, cycleDuration: 21, totalRevenue: 429450, price: 214200, limit: 4 }
-};     
+    1: { 
+        dailyRevenue: 1500, 
+        cycleDuration: 17, 
+        totalRevenue: 46500, 
+        price: 2200, 
+        limit: 1 
+    },
+    2: { 
+        dailyRevenue: 2500, 
+        cycleDuration: 20, 
+        totalRevenue: 77500, 
+        price: 5100, 
+        limit: 2 
+    },
+    3: { 
+        dailyRevenue: 3500, 
+        cycleDuration: 21, 
+        totalRevenue: 108500, 
+        price: 12500, 
+        limit: 2 
+    },
+    4: { 
+        dailyRevenue: 4500, 
+        cycleDuration: 21, 
+        totalRevenue: 139500, 
+        price: 25500, 
+        limit: 2 
+    },
+    5: { 
+        dailyRevenue: 5500, 
+        cycleDuration: 21, 
+        totalRevenue: 170500, 
+        price: 52500, 
+        limit: 2 
+    },
+    6: { 
+        dailyRevenue: 6500, 
+        cycleDuration: 21, 
+        totalRevenue: 201500, 
+        price: 109200, 
+        limit: 4 
+    },
+    7: { 
+        dailyRevenue: 12500, 
+        cycleDuration: 21, 
+        totalRevenue: 387500, 
+        price: 214200, 
+        limit: 4 
+    }
+};
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyDRrkHLMeb6dwgT9OnLRDnTbsAkSxO3qoQ",
@@ -324,9 +367,9 @@ function renderVIPs(investments) {
         return `
             <div class="vip-card">
                 <div class="vip-header">
-                    <div class="vip-logo">Maison ${investment.productId}</div>
+                    <div class="vip-logo">BÂTI ${investment.productId}</div>
                     <div>
-                        <div class="vip-title">Maison ${investment.productId}</div>
+                        <div class="vip-title">BÂTIMENT ${investment.productId}</div>
                         <div class="vip-subtitle">${config.dailyRevenue.toLocaleString()} XOF / jour</div>
                     </div>
                 </div>
