@@ -509,7 +509,7 @@ class FormManager {
 
             const email = `${telephone}@temp.com`;
             await signInWithEmailAndPassword(auth, email, password);
-            window.location.href = "accueil.html";
+            window.location.href = "investir.html";
         } catch (error) {
             console.error("Erreur de connexion:", error);
             Utils.showError("loginError", "Numéro ou mot de passe incorrect");
